@@ -34,13 +34,13 @@ export function JsonWorkspace() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex min-h-0 flex-1 flex-col">
       {notice && (
-        <p role="alert" className="rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning ring-1 ring-warning/20">
+        <p role="alert" className="shrink-0 border-b border-warning/40 bg-warning/5 px-3 py-1 font-mono text-[11px] text-warning">
           {notice}
         </p>
       )}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[70dvh_80dvh] divide-y divide-border md:grid-cols-2 md:grid-rows-1 md:divide-x md:divide-y-0">
         <InputPane
           value={input}
           onChange={setInput}

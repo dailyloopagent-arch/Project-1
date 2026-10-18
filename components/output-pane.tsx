@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Copy, Download, FileSearch } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Check, Copy, Download } from 'lucide-react'
 import { JsonHighlight } from '@/components/json-highlight'
+import { PaneHeader } from '@/components/pane-header'
 import { StatusBanner } from '@/components/status-banner'
+import { ToolbarButton } from '@/components/toolbar-button'
 import type { AnalysisResult } from '@/lib/json-repair'
 import { cn } from '@/lib/utils'
 
@@ -25,7 +26,7 @@ export function OutputPane({ result, output, mode, onModeChange }: OutputPanePro
     try {
       await navigator.clipboard.writeText(output)
       setCopied(true)
-      setTimeout(() => setCopied(false), 1800)
+      setTimeout(() => setCopied(false), 1600)
     } catch {
       setCopied(false)
     }
@@ -33,8 +34,7 @@ export function OutputPane({ result, output, mode, onModeChange }: OutputPanePro
 
   const handleDownload = () => {
     if (!output) return
-    const blob = new Blob([output], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
+    const url = URL.createObjectURL(new Blob([output], { type: 'application/json' }))
     const link = document.createElement('a')
     link.href = url
     link.download = 'clean.json'
@@ -43,52 +43,35 @@ export function OutputPane({ result, output, mode, onModeChange }: OutputPanePro
   }
 
   return (
-    <section
-      aria-labelledby="output-title"
-      className="flex h-[560px] flex-col overflow-hidden rounded-xl border border-border bg-card lg:h-[620px]"
-    >
-      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-        <span className="size-2 rounded-full bg-success" aria-hidden="true" />
-        <h2 id="output-title" className="text-sm font-semibold">
-          Output &amp; Diagnosis
-        </h2>
-      </div>
+    <section aria-labelledby="output-title" className="flex min-h-0 flex-col">
+      <PaneHeader id="output-title" title="Output" hint="Repaired JSON">
+        <ToolbarButton onClick={handleCopy} disabled={!output} className="text-foreground">
+          {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+          {copied ? 'Copied' : 'Copy Clean JSON'}
+        </ToolbarButton>
+        <ToolbarButton onClick={handleDownload} disabled={!output}>
+          <Download aria-hidden="true" />
+          Download .json
+        </ToolbarButton>
+      </PaneHeader>
 
       <StatusBanner result={result} />
 
-      <div className="min-h-0 flex-1 overflow-auto bg-editor py-3">
+      <div className="min-h-0 flex-1 overflow-auto bg-editor py-2">
         {output ? (
-          <JsonHighlight code={output} wrap={mode === 'minify'} />
+          <JsonHighlight code={output} />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <FileSearch className="size-6" aria-hidden="true" />
-            </span>
-            <p className="max-w-xs text-sm text-muted-foreground text-pretty">
-              {result.status === 'invalid'
-                ? 'This one is beyond automatic repair. Check the highlighted line in the input.'
-                : 'Clean, formatted JSON will appear here.'}
-            </p>
-          </div>
+          <p className="px-3 font-mono text-xs text-muted-foreground">
+            {result.status === 'invalid'
+              ? '// Unable to repair automatically. Check the highlighted input line.'
+              : '// Clean, formatted JSON will appear here.'}
+          </p>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Button size="sm" onClick={handleCopy} disabled={!output} className="font-semibold">
-            {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-            {copied ? 'Copied!' : 'Copy Clean JSON'}
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleDownload} disabled={!output}>
-            <Download aria-hidden="true" />
-            Download .json File
-          </Button>
-        </div>
-        <div
-          role="group"
-          aria-label="Output format"
-          className="inline-flex rounded-lg bg-muted p-0.5 ring-1 ring-border"
-        >
+      <div className="flex h-6 shrink-0 items-center justify-between border-t border-border px-3 font-mono text-[10px] text-muted-foreground">
+        <span>{output ? `${output.length.toLocaleString()} chars` : '—'}</span>
+        <div role="group" aria-label="Output format" className="flex items-center gap-2">
           {(['pretty', 'minify'] as const).map((option) => (
             <button
               key={option}
@@ -96,10 +79,8 @@ export function OutputPane({ result, output, mode, onModeChange }: OutputPanePro
               aria-pressed={mode === option}
               onClick={() => onModeChange(option)}
               className={cn(
-                'rounded-md px-3 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-                mode === option
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground',
+                'transition-colors hover:text-foreground focus-visible:text-foreground focus-visible:underline focus-visible:outline-none',
+                mode === option && 'text-foreground underline underline-offset-2',
               )}
             >
               {option === 'pretty' ? 'Prettify' : 'Minify'}

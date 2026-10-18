@@ -1,55 +1,36 @@
-import { Heart, Search, ShoppingBag } from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
+import { Braces } from 'lucide-react'
+import { GithubIcon } from '@/components/icons/github-icon'
 import { siteConfig } from '@/lib/site-config'
-import { cn } from '@/lib/utils'
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-        <a href="/" className="flex items-center gap-2.5" aria-label={`${siteConfig.name} home`}>
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-primary/30">
-            <Search className="size-5" strokeWidth={2.5} aria-hidden="true" />
-          </span>
-          <span className="flex flex-col leading-tight">
-            <span className="text-base font-semibold tracking-tight">{siteConfig.name}</span>
-            <span className="hidden font-mono text-[11px] text-muted-foreground sm:block">
-              {'parse() → diagnose() → fix()'}
-            </span>
-          </span>
-        </a>
-
-        <nav aria-label="Primary" className="flex items-center gap-2">
-          <a
-            href={siteConfig.kofiUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'hidden md:inline-flex')}
-          >
-            <Heart className="text-destructive" aria-hidden="true" />
-            Support Developer
-          </a>
-          <a
-            href={siteConfig.kofiUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Support Developer"
-            className={cn(buttonVariants({ variant: 'outline', size: 'icon-lg' }), 'md:hidden')}
-          >
-            <Heart className="text-destructive" aria-hidden="true" />
-          </a>
-          <a
-            href={siteConfig.debuggingKitUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ size: 'lg' }), 'px-3 font-semibold hover:bg-primary/85')}
-          >
-            <ShoppingBag aria-hidden="true" />
-            <span className="hidden sm:inline">Get API Debugging Kit ($9)</span>
-            <span className="sm:hidden">Kit ($9)</span>
-          </a>
-        </nav>
+    <header className="flex h-12 shrink-0 items-center justify-between gap-4 border-b border-border px-3 sm:px-4">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <Braces className="size-4 shrink-0 text-foreground" aria-hidden="true" />
+        <span className="truncate text-sm font-semibold tracking-tight">{siteConfig.name}</span>
+        <span className="hidden shrink-0 rounded-sm border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
+          {'v1.0 • Client-Side'}
+        </span>
       </div>
+      <nav aria-label="External links" className="flex shrink-0 items-center gap-1">
+        <a
+          href={siteConfig.debuggingKitUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-7 items-center rounded-sm border border-border px-2.5 font-mono text-[11px] text-foreground transition-colors hover:bg-accent focus-visible:border-ring focus-visible:outline-none"
+        >
+          API Debugging Kit ($14)
+        </a>
+        <a
+          href={siteConfig.githubUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub repository"
+          className="inline-flex size-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <GithubIcon className="size-4" aria-hidden="true" />
+        </a>
+      </nav>
     </header>
   )
 }

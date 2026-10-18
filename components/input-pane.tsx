@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef } from 'react'
-import { ClipboardPaste, FlaskConical, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ClipboardPaste, FlaskConical, X } from 'lucide-react'
+import { PaneHeader } from '@/components/pane-header'
+import { ToolbarButton } from '@/components/toolbar-button'
 import { cn } from '@/lib/utils'
 
 type InputPaneProps = {
@@ -15,6 +15,8 @@ type InputPaneProps = {
   errorLine?: number
 }
 
+const TEXT_METRICS = 'font-mono text-xs leading-5 whitespace-pre-wrap [overflow-wrap:anywhere]'
+
 export function InputPane({
   value,
   onChange,
@@ -24,94 +26,76 @@ export function InputPane({
   flaggedLines,
   errorLine,
 }: InputPaneProps) {
-  const gutterRef = useRef<HTMLDivElement>(null)
-  const lineCount = Math.max(value.split('\n').length, 1)
+  const lines = value.split('\n')
 
   return (
-    <section
-      aria-labelledby="input-title"
-      className="flex h-[480px] flex-col overflow-hidden rounded-xl border border-border bg-card lg:h-[620px]"
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
-          <h2 id="input-title" className="text-sm font-semibold">
-            Paste Raw or Malformed JSON
-          </h2>
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Button variant="outline" size="sm" onClick={onSample}>
-            <FlaskConical aria-hidden="true" />
-            Sample Broken JSON
-          </Button>
-          <Button variant="outline" size="sm" onClick={onClear} disabled={!value}>
-            <Trash2 aria-hidden="true" />
-            Clear
-          </Button>
-          <Button variant="secondary" size="sm" onClick={onPaste}>
-            <ClipboardPaste aria-hidden="true" />
-            Paste from Clipboard
-          </Button>
-        </div>
-      </div>
+    <section aria-labelledby="input-title" className="flex min-h-0 flex-col">
+      <PaneHeader id="input-title" title="Input" hint="Malformed JSON">
+        <ToolbarButton onClick={onSample}>
+          <FlaskConical aria-hidden="true" />
+          Sample
+        </ToolbarButton>
+        <ToolbarButton onClick={onClear} disabled={!value}>
+          <X aria-hidden="true" />
+          Clear
+        </ToolbarButton>
+        <ToolbarButton onClick={onPaste}>
+          <ClipboardPaste aria-hidden="true" />
+          Paste
+        </ToolbarButton>
+      </PaneHeader>
 
-      <div className="relative flex min-h-0 flex-1 bg-editor">
-        <div
-          ref={gutterRef}
-          aria-hidden="true"
-          className="w-12 shrink-0 overflow-hidden border-r border-border bg-gutter py-3 font-mono text-[13px] leading-6"
-        >
-          {Array.from({ length: lineCount }, (_, index) => {
-            const line = index + 1
-            const isError = line === errorLine
-            const isFlagged = flaggedLines.has(line)
-            return (
-              <div
-                key={line}
-                className={cn(
-                  'relative pr-3 text-right text-muted-foreground/50',
-                  isFlagged && 'bg-warning/10 text-warning',
-                  isError && 'bg-destructive/15 text-destructive',
-                )}
-              >
-                {(isFlagged || isError) && (
+      <div className="min-h-0 flex-1 overflow-auto bg-editor">
+        <div className="relative min-h-full py-2">
+          <div aria-hidden="true">
+            {lines.map((line, index) => {
+              const lineNumber = index + 1
+              const isError = lineNumber === errorLine
+              const isFlagged = flaggedLines.has(lineNumber)
+              return (
+                <div
+                  key={index}
+                  className={cn('flex', isFlagged && 'bg-warning/5', isError && 'bg-destructive/10')}
+                >
                   <span
                     className={cn(
-                      'absolute top-1/2 left-1.5 size-1.5 -translate-y-1/2 rounded-full',
-                      isError ? 'bg-destructive' : 'bg-warning',
+                      'w-10 shrink-0 select-none border-r border-border pr-2 text-right font-mono text-xs leading-5 text-muted-foreground/50',
+                      isFlagged && 'text-warning',
+                      isError && 'text-destructive',
                     )}
-                  />
-                )}
-                {line}
-              </div>
-            )
-          })}
+                  >
+                    {lineNumber}
+                  </span>
+                  <span className={cn(TEXT_METRICS, 'invisible min-w-0 flex-1 px-3')}>{line || ' '}</span>
+                </div>
+              )
+            })}
+          </div>
+          <label htmlFor="json-input" className="sr-only">
+            JSON input
+          </label>
+          <textarea
+            id="json-input"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            autoCorrect="off"
+            placeholder={'{ "paste": "your broken JSON here", }'}
+            className={cn(
+              TEXT_METRICS,
+              'absolute inset-y-0 right-0 left-10 resize-none overflow-hidden bg-transparent px-3 py-2 text-foreground caret-foreground outline-none placeholder:text-muted-foreground/40',
+            )}
+          />
         </div>
-        <label htmlFor="json-input" className="sr-only">
-          JSON input
-        </label>
-        <textarea
-          id="json-input"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          onScroll={(event) => {
-            if (gutterRef.current) gutterRef.current.scrollTop = event.currentTarget.scrollTop
-          }}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoComplete="off"
-          autoCorrect="off"
-          wrap="off"
-          placeholder={'{\n  "paste": "your broken JSON here",\n}'}
-          className="min-h-0 flex-1 resize-none overflow-auto bg-transparent px-4 py-3 font-mono text-[13px] leading-6 text-foreground caret-primary outline-none placeholder:text-muted-foreground/40"
-        />
       </div>
 
-      <div className="flex items-center justify-between border-t border-border px-4 py-2 font-mono text-[11px] text-muted-foreground">
+      <div className="flex h-6 shrink-0 items-center justify-between border-t border-border px-3 font-mono text-[10px] text-muted-foreground">
         <span>
-          {lineCount} {lineCount === 1 ? 'line' : 'lines'} · {value.length.toLocaleString()} chars
+          {lines.length} {lines.length === 1 ? 'line' : 'lines'} · {value.length.toLocaleString()} chars
         </span>
-        <span>UTF-8 · JSON</span>
+        <span>UTF-8</span>
       </div>
     </section>
   )

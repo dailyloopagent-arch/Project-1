@@ -12,20 +12,18 @@ function highlightLine(line: string) {
     if (index > lastIndex) nodes.push(line.slice(lastIndex, index))
     const [full, str, colon, bool, nul, num, punct] = match
     if (str !== undefined) {
-      if (colon !== undefined) {
-        nodes.push(
+      nodes.push(
+        colon !== undefined ? (
           <Fragment key={key++}>
             <span className="text-syntax-key">{str}</span>
             <span className="text-muted-foreground">{colon}</span>
-          </Fragment>,
-        )
-      } else {
-        nodes.push(
+          </Fragment>
+        ) : (
           <span key={key++} className="text-syntax-string">
             {str}
-          </span>,
-        )
-      }
+          </span>
+        ),
+      )
     } else if (bool !== undefined || nul !== undefined) {
       nodes.push(
         <span key={key++} className="text-syntax-literal">
@@ -51,32 +49,19 @@ function highlightLine(line: string) {
   return nodes
 }
 
-export const JsonHighlight = memo(function JsonHighlight({
-  code,
-  wrap,
-}: {
-  code: string
-  wrap: boolean
-}) {
-  const lines = code.split('\n')
+export const JsonHighlight = memo(function JsonHighlight({ code }: { code: string }) {
   return (
-    <pre className="font-mono text-[13px] leading-6">
-      <code className="table w-full">
-        {lines.map((line, index) => (
-          <span key={index} className="table-row">
+    <pre className="font-mono text-xs leading-5">
+      <code className="block">
+        {code.split('\n').map((line, index) => (
+          <span key={index} className="flex">
             <span
               aria-hidden="true"
-              className="table-cell w-12 select-none bg-gutter pr-3 text-right text-muted-foreground/50"
+              className="w-10 shrink-0 select-none border-r border-border pr-2 text-right text-muted-foreground/50"
             >
               {index + 1}
             </span>
-            <span
-              className={
-                wrap
-                  ? 'table-cell whitespace-pre-wrap break-all pl-4 pr-4'
-                  : 'table-cell whitespace-pre pl-4 pr-4'
-              }
-            >
+            <span className="min-w-0 flex-1 px-3 whitespace-pre-wrap [overflow-wrap:anywhere]">
               {highlightLine(line)}
             </span>
           </span>
